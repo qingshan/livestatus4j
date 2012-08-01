@@ -1,4 +1,4 @@
 livestatus4j
 ============
 
-Java Client Library for mk_livestatus
+Java client library for mk_livestatus.
