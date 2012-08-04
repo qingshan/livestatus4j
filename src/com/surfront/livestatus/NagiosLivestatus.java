@@ -5,7 +5,9 @@ import com.surfront.livestatus.client.LivestatusQuery;
 import com.surfront.livestatus.client.LivestatusResult;
 import com.surfront.livestatus.util.NagiosHelper;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.*;
 
 public class NagiosLivestatus {
@@ -101,6 +103,44 @@ public class NagiosLivestatus {
             services.add(toNagiosService(result, i));
         }
         return services;
+    }
+
+    public List<NagiosSummary> getSummaries() throws IOException {
+        StringBuilder sb = new StringBuilder();
+        sb.append("GET services\n");
+        sb.append("Stats: state = 0\n");
+        sb.append("Stats: state = 1\n");
+        sb.append("Stats: state = 2\n");
+        sb.append("Stats: state = 3\n");
+        sb.append("Columns: host_name\n");
+        sb.append("\n");
+        String request = sb.toString();
+        String response = client.query(request);
+        List<NagiosSummary> summaries = new ArrayList<NagiosSummary>();
+        BufferedReader in = null;
+        try {
+            in = new BufferedReader(new StringReader(response));
+            String line;
+            while ((line = in.readLine()) != null) {
+                List<String> values = new ArrayList<String>();
+                for( String field : line.split(";") ){
+                    values.add(field);
+                }
+                String name = values.get(0);
+                NagiosSummary summary = new NagiosSummary();
+                summary.setName(name);
+                summary.addOkServiceCount(Integer.parseInt(values.get(1)));
+                summary.addWarningServiceCount(Integer.parseInt(values.get(2)));
+                summary.addCriticalServiceCount(Integer.parseInt(values.get(3)));
+                summary.addUnknownServiceCount(Integer.parseInt(values.get(4)));
+                summaries.add(summary);
+            }
+        } finally {
+            if (in != null) {
+                in.close();
+            }
+        }
+        return summaries;
     }
 
     private NagiosHostgroup toHostgroup(String name, List<NagiosHost> hosts) {
