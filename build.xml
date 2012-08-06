@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="livestatus4j" basedir=".">
+    <!-- Version Properites -->
+    <property name="product.name" value="livestatus4j"/>
+    <property name="product.version" value="1.0.0"/>
+    <property name="product.vendor" value="surfront"/>
+
+    <!-- Path Properites -->
+    <property name="src.dir" value="./src"/>
+    <property name="lib.dir" value="./lib"/>
+    <property name="build.dir" value="../build"/>
+
+    <!-- Classpath Definition -->
+    <path id="classpath">
+        <fileset dir="${lib.dir}">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Compile -->
+    <target name="compile">
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${build.dir}/classes"/>
+
+        <!-- Compile Java Source Files -->
+        <javac srcdir="${src.dir}" destdir="${build.dir}/classes" debug="on" nowarn="on" classpathref="classpath"/>
+
+        <!-- Copy Extra Files -->
+        <copy todir="${build.dir}/classes">
+            <fileset dir="${src.dir}">
+                <exclude name="**/*.java"/>
+            </fileset>
+        </copy>
+    </target>
+
+    <!-- Build -->
+    <target name="build" depends="compile">
+        <tstamp>
+            <format property="build.date" pattern="yyyyMMdd"/>
+        </tstamp>
+
+        <!-- Build Jar File -->
+        <jar destfile="${build.dir}/${product.name}.jar" basedir="${build.dir}/classes" update="true">
+            <manifest>
+                <attribute name="Implementation-Title" value="${product.name}"/>
+                <attribute name="Implementation-Version" value="${product.version}.${build.date}"/>
+                <attribute name="Implementation-Vendor" value="${product.vendor}"/>
+			</manifest>
+        </jar>
+    </target>
+
+    <!-- Clean -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
